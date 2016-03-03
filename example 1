@@ -1,0 +1,180 @@
+
+
+#include <stdlib.h>//include libraries
+#include <stdio.h>
+#include <string.h>
+
+int load_data(char*,int*,float*);//declare prototypes
+void print_data(int*,float*,int);
+int highest_amount(float*,int);
+int lowest_amount(float*,int);
+float average_amount(float*,int);
+int write_data(char*,int*,float*,int,int,int,float);
+
+int main(int argc,char**argv)//start main 
+{
+	while(argc!=4)//error check for correct number of inputs
+	{
+		printf("Insufficient arguments\n");//error message
+		return 0;//terminate program
+	}
+	
+	int size=atoi(argv[2]);//retrieves size
+
+	int *bank_number;//declares integer pointer
+	bank_number=(int*)malloc(sizeof(int)*size);//allocates memory
+		if(bank_number==0)//test for memory
+		{
+			printf("ERROR: Out of memory\n");//error message if no memory
+			return 1;
+		}
+		
+	float *amount;//declares float pointer
+	amount=(float*)malloc(sizeof(float)*size);//allocates memory
+		if(bank_number==0)//test for memory
+		{
+			printf("ERROR: Out of memory\n");//error message if no memory
+			return 1;
+		}
+
+	int open_file;//declares int
+	open_file=load_data(argv[1],bank_number,amount);//calls open_file function
+	
+	print_data(bank_number,amount,size);//calls print_data function
+	
+	int high;//declares int
+	high=highest_amount(amount,size);//stores info and prints
+	printf("The highest amount is $%.2f in the account number %d\n", *(amount+high),*(bank_number+high));
+
+	int low;//declares int
+	low=lowest_amount(amount,size);//stores info and prints
+	printf("The lowest amount is $%.2f in the account number %d\n", *(amount+low),*(bank_number+low));
+
+	float average;//declares int
+	average=average_amount(amount,size);//stores info and prints
+	printf("The average amount is $%.2f\n",average);
+
+	write_data(argv[3],bank_number,amount,size,high,low,average);//calls write_data function
+
+	free(bank_number);//frees memory allocated to each pointer
+	free(amount);
+
+return 0;
+}
+
+int load_data(char *input, int *accts, float *money)//starts function
+{
+	
+	FILE* test=fopen(input,"r");//points to read file	
+	
+	if(test==NULL)//tests if the file was opened
+	{
+		return 0;
+	}
+
+	int x,a;//declare variables
+	int i;
+	float b;
+
+	fscanf(test,"%d",&x);//read in the size of the file and store
+	for(i=0;i<x;i++)//store information in the two arrays
+	{
+		fscanf(test,"%d%f",&a,&b);
+		accts[i]=a;
+		money[i]=b;
+	}
+
+
+	fclose(test);//close file
+	return 1;
+}
+
+void print_data(int *accts, float *money, int number)//starts function
+{
+	int i;//declare variable
+	
+	printf("Account No. Amount\n");//print header
+
+	for(i=0;i<number;i++)//start loop to print information
+	{
+		printf("%d         %.2f\n",accts[i],money[i]);
+	}
+return;
+}
+
+int highest_amount(float *money, int number)//starts function
+{
+	int i,index;//declare variables
+	float start = money[0];
+
+	for(i=1;i<number;i++)//begin loop to find highest number
+	{
+		if(money[i]>start)//stores float and place in array if higher
+		{
+			start=money[i];
+			index=i;
+		}
+	}
+return index;
+}
+
+int lowest_amount(float *money, int number)//starts function
+{
+	int i,index;//declare variables
+	float start = money[0];
+
+	for(i=1;i<number;i++)//begin loop to find lower number
+	{
+		if(money[i]<start)//stores float and place in array if lower
+		{
+			start=money[i];
+			index=i;
+		}
+	}
+return index;
+}
+
+float average_amount(float *money,int number)//starts function
+{
+	int i;//declare variables
+	float total,avg;
+
+	float start = money[0];
+
+	for(i=0;i<number;i++)//begin loop to find sum of all numbers
+	{
+		total+=money[i];
+	}
+
+	avg=(total/number);//divide total by amount of numbers, which gives the average
+
+return avg;
+}
+
+int write_data(char* output, int* accts, float* money, int n, int h, int l, float a)//starts function
+{
+	int i;//declare variable
+	FILE* file=fopen(output,"w");//start pointer to file with type w
+	if(file==NULL)//if file doesnt open return a zero
+	{
+		return 0;
+	}
+
+	int account_number;//declare variables
+	float money_number;
+
+	for(i=0;i<n;i++)//start loop 
+	{
+		account_number=*(accts+i);//stores specific account number
+		money_number=*(money+i);//stores specific money amount
+		fprintf(file,"%d %.2f\n",account_number,money_number);//prints information in new file
+	}
+
+	fprintf(file,"The highest amount is $%.2f in the account number %d\n",*(money+h),*(accts+h));//print the highest,lowest,and average in new file
+	fprintf(file,"The lowest amount is $%.2f in the account number %d\n",*(money+l),*(accts+l));
+	fprintf(file,"average amount is $%.2f\n",a);
+}
+
+
+
+
