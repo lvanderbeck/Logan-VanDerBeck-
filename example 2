@@ -1,0 +1,478 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include<string.h>
+
+#define NUMHEROES 6
+#define NUMCHOSENHEROES 3
+#define MAXNUMSAVEFILES 5
+#define MAXPLAYERNAME 20
+typedef enum f_
+{
+        EXIST,
+        DOESNOTEXIST
+} FileFinder;
+
+
+typedef struct hero_
+{
+        char name[40];
+        int health;
+        int baseDefense;
+        int baseAttack;
+        int baseSpeed;
+} Hero;
+
+
+typedef struct boss_
+{
+        char name[40];
+        int health;
+        int maxHealth;
+        int baseDefense;
+        int baseAttack;
+        int baseSpeed;
+} Boss;
+void deleteFile(int choice, char* filename);
+void saveFileData(int choice, char* filename, Hero* heroes, char* playerName, int progress);
+char* getPlayerName();
+Hero* loadSavedData(char* filename);
+Hero* loadInitialData();
+Hero* pickHeroes(Hero* heroes);
+void sortHeroes(Hero* heroes);
+void printHeroes(Hero* heroes, int numHeroes);
+FileFinder findSaveFile();
+void loadSavedGameHandler();
+void DeleteSavedGameHandler();
+void loadGameStateData(char*** names, int** states, int* fileCount);
+char* choiceToFile(int num);
+void freeMemory(char** names, int* states);
+void startNewGame();
+void playGame(Hero* heroes, char* playerName, Boss* boss, int progress, int choice);
+int chooseSaveFile();
+
+int main(void)
+{
+}
+
+void deleteFile(int choice, char* filename)
+{
+
+}
+
+void saveFileData(int choice, char* filename, Hero* heroes, char* playerName, int progress)
+{
+}
+
+char* getPlayerName()
+{
+char input;
+int i;
+Hero* Name;
+printf("Please enter the name of your character: ");
+scanf("%c\n", input);
+while (input[i] != '\0'){
+        Name[i]=input[i].PlayerName;
+        i++;
+}
+return *Name;
+}
+
+Hero* loadSavedData(char* filename)
+{
+FILE* filename=fopen("gamestats.txt", "r");
+char** names;
+        int* states;
+        int numFiles;
+        int choice;
+ loadGameStateData(&names, &states, &numFiles);
+fwrite(names, sizeof(char), filename);
+return *filename;
+}
+
+Hero* loadInitialData()
+{
+}
+
+Hero* pickHeroes(Hero* heroes)
+{
+int i;
+int size;
+int char1, char2, char3;
+int i;
+int size;
+int char1, char2, char3;
+FILE* file=fopen("Heroes.txt", "r");
+if (file=NULL)
+{
+return 0;
+}
+printf("Please enter the name of the character you wish to play: ");
+scanf("%d", char1);
+        if(char1<1 || char1>6){
+        printf("please pick a valid character: ");
+        scanf("%d", char1);
+        }
+printf("please enter another character: ");
+scanf("%d", char2);
+        if(char2==char1 || char2>6 || char2<1)
+        {
+        printf("please pick a valid character: ");
+        scanf("%d", char2);
+ }
+printf("please enter another character: ");
+scanf("%d", char3);
+        if(char3==char1 || char3==char2 || char3>6 || char2<1)
+        {
+        printf("please pick a valid character: ");
+        scanf("%d", char3);
+        }
+}
+}
+
+void sortHeroes(Hero* heroes)
+{
+}
+
+void printHeroes(Hero* heroes, int numHeroes)
+{
+}
+FileFinder findSaveFile()
+{
+        printf("Checking save file...\n\n");
+        FILE* fp = fopen("gamestate.txt", "r");
+        if(!fp)
+        {
+                perror("gamestate.txt read error");
+                exit(1);
+        }
+
+        int numFiles;
+        if(fscanf(fp, "%d", &numFiles) < 1)
+        {
+                printf("gamestate.txt: failed to read number of save files. Check input file.\n");
+                exit(1);
+        }
+
+        FileFinder f;
+        if (numFiles == 0)
+        {
+
+                f = DOESNOTEXIST;
+        }
+        else
+        {
+                f = EXIST;
+        }
+
+        fclose(fp);
+
+        printf("Check complete.\n\n");
+        return f;
+}
+
+void loadSavedGameHandler()
+{
+        char** names;
+        int* states;
+        int numFiles;
+        int choice;
+
+        loadGameStateData(&names, &states, &numFiles);
+
+        while(1)
+        {
+                printf("\nChoose a file you would like to load: \n");
+                printf("(-1 to return to main menu)\n");
+                printf(">");
+                scanf("%d", &choice);
+                while((choice < 1 || choice > MAXNUMSAVEFILES) && choice != -1)
+                {
+                        printf("Invalid choice. Please choose a different option:\n ");
+                        printf(">");
+                        scanf("%d", &choice);
+
+                }
+
+                if(choice == -1)
+                {
+                        freeMemory(names, states);
+                        return;
+                }
+
+                if(states[choice-1] == 0)
+                {
+                        printf("There is no saved file present in this slot.\n");
+                }
+                else
+                {
+
+                        if(states[choice-1] == 1)
+                        {
+                                playGame(loadInitialData(), names[choice-1], NULL, states[choice-1], choice);
+                        }
+                        else
+                        {
+                                Hero* heroes = loadSavedData(choiceToFile(choice-1));
+                                if(!heroes)
+                                {
+                                        printf("Failed to load heroes. Exiting...\n");
+                                        freeMemory(names, states);
+                                        exit(1);
+                                }
+                                playGame(heroes, names[choice-1], NULL, states[choice-1], choice);
+                        }
+
+                        freeMemory(names, states);
+                        return;
+                }
+        }
+}
+
+void DeleteSavedGameHandler()
+{
+
+        char** names;
+        int* states;
+        int numFiles;
+        int flag = 0;
+        int choice = -1;
+
+        while (1)
+        {
+
+                if(flag == 0)
+                {
+                        if(choice != -1)
+                        {
+                                freeMemory(names, states);
+                        }
+                        loadGameStateData(&names, &states, &numFiles);
+                }
+
+                printf("\nChoose a file you would like to delete: \n");
+                printf("(-1 to return to main menu)\n");
+                printf(">");
+                scanf("%d", &choice);
+                while((choice < 1 || choice > MAXNUMSAVEFILES) && choice != -1)
+                {
+                        printf("Invalid choice. Please choose a different option:\n ");
+                                                              printf(">");
+                        scanf("%d", &choice);
+                }
+
+                if(choice == -1)
+                {
+
+                        freeMemory(names, states);
+                        return;
+                }
+
+                if(states[choice-1] == 0)
+                {
+                        printf("There is no saved file present in this slot.\n");
+                        flag = 1;
+                }
+                else
+                {
+                        deleteFile(choice, choiceToFile(choice-1));
+                        flag = 0;
+                }
+        }
+}
+
+void loadGameStateData(char*** names, int** states, int* fileCount)
+{
+        printf("\n\n");
+        char** n = malloc(sizeof(char*)*MAXNUMSAVEFILES);
+        int i;
+        for(i = 0; i < MAXNUMSAVEFILES; i++)
+        {
+                n[i] = malloc(sizeof(char)*MAXPLAYERNAME);
+        }
+
+        int* s = malloc(sizeof(int)*MAXNUMSAVEFILES);
+        FILE* fp = fopen("gamestate.txt", "r");
+        if(!fp)
+        {
+                perror("gamestate.txt");
+                freeMemory(n, s);
+                exit(1);
+        }
+
+                                    int numFiles;
+        if(fscanf(fp, "%d", &numFiles) < 1)
+        {
+                printf("gamestate.txt: could not read the number of save files. Check input file.\n");
+                freeMemory(n,s);
+                exit(1);
+        }
+
+        for(i = 0; i < MAXNUMSAVEFILES; i++)
+        {
+                if(fscanf(fp, "%s | %d", n[i], &s[i]) < 2)
+                {
+                        printf("gamestate.txt: could not read save file data #%d. Check input file.\n", i+1);
+                        freeMemory(n,s);
+                        exit(1);
+                }
+                switch(s[i])
+                {
+                        case 0:
+                                printf("%d: [No File Present]\n", i+1);
+                                break;
+                        case 1:
+                                printf("%d: %s - ", i+1, n[i]);
+                                printf("Heroes have not been selected.\n");
+                                break;
+                        case 2:
+                                printf("%d: %s - ", i+1, n[i]);
+                                printf("Heroes have been selected.\n");
+                                break;
+                }
+        }
+
+        fclose(fp);
+
+        *names = n;
+        *states = s;
+        *fileCount = numFiles;
+}
+
+char* choiceToFile(int num)
+{
+        switch(num)
+        {
+                     switch(num)
+        {
+                case 0: return "file1.txt"; break;
+                case 1: return "file2.txt"; break;
+                case 2: return "file3.txt"; break;
+                case 3: return "file4.txt"; break;
+                case 4: return "file5.txt"; break;
+                default:
+                        printf("Something happened with the save file choice. See Daniel.\n");
+                        exit(1); break;
+        }
+}
+
+void freeMemory(char** names, int* states)
+{
+        int i;
+
+        for(i = 0; i < MAXNUMSAVEFILES; i++)
+        {
+                free(names[i]);
+        }
+        free(names);
+        free(states);
+}
+
+void startNewGame()
+{
+
+        Hero* heroes = loadInitialData();
+        playGame(heroes, NULL, NULL, 0, -1);
+}
+
+void playGame(Hero* heroes, char* playerName, Boss* boss, int progress, int choice)
+{
+        if(progress > 0)
+        {
+                printf("\nWelcome back %s.\n\n", playerName);
+        }
+
+        int initialprogress = progress;
+
+        Hero* chosenHeroes;
+
+        if(progress > 1)
+        {
+                chosenHeroes = heroes;
+        }
+
+        switch(progress)
+        {
+                case 0:
+                        playerName = getPlayerName();
+                        choice = chooseSaveFile();
+                        saveFileData(choice, choiceToFile(choice-1), NULL, playerName, 1);
+                case 1:
+                        chosenHeroes = pickHeroes(heroes);
+                        saveFileData(choice, choiceToFile(choice-1), chosenHeroes, playerName, 2);
+                        free(heroes);
+                case 2:
+
+                        printHeroes(chosenHeroes, NUMCHOSENHEROES);
+                        free(chosenHeroes);
+
+                        break;
+
+                case 3:
+
+                        printf("Why is progree value 3? It should not be here yet.\n");
+                default:
+
+                        printf("Something fatal happened with the progress value. Check gamestate.txt.\n");
+                        break;
+        }
+
+        printf("\n\n**********Until Next Homework!*************\n\n");
+
+
+        if(initialprogress == 0)
+        {
+                free(playerName);
+        }
+        return;
+}
+
+int chooseSaveFile()
+{
+                                           char** names;
+        int* states;
+        int numFiles;
+        int choice;
+        int confirm = 1;
+
+        loadGameStateData(&names, &states, &numFiles);
+
+        while(1)
+        {
+                confirm = 1;
+                printf("\nChoose a file you would like to save to: \n");
+                printf(">");
+                scanf("%d", &choice);
+                while((choice < 1 || choice > MAXNUMSAVEFILES))
+                {
+                        printf("Invalid choice. Please choose a different option:\n ");
+                        printf(">");
+                        scanf("%d", &choice);
+                }
+
+                if(states[choice-1] != 0)
+                {
+                        printf("There is a file here. Would you like to override it? (1 = yes, 0 = no)\n");
+                        printf(">");
+                        scanf("%d", &confirm);
+                        while(confirm != 1 && confirm != 0)
+                        {
+                                printf("Invalid choice. Please choose a different option:\n ");
+                                printf(">");
+                                scanf("%d", &confirm);
+                        }
+                }
+
+                if(confirm == 1)
+                {
+                        if(states[choice-1] == 2)
+                        {
+                                deleteFile(choice, choiceToFile(choice-1));
+                        }
+                        freeMemory(names, states);
+                        return choice;
+                }
+                                           
+        }
+}
+
+
